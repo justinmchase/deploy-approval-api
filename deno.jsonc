@@ -1,9 +1,10 @@
 {
   "tasks": {
+    "check": "deno fmt && deno lint",
     "dev": "deno run --watch -A main.ts"
   },
   "imports": {
     "std/": "https://deno.land/std@0.197.0/",
-    "grove/": "https://deno.land/x/grove@0.4.5/",
+    "grove/": "https://deno.land/x/grove@0.5.0-pre.3/"
   }
 }

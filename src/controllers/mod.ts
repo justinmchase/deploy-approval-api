@@ -4,10 +4,10 @@ import {
   HealthController,
   IsHtmlController,
   LogController,
-  NotFoundController
+  NotFoundController,
 } from "grove/mod.ts";
 import { Context, State } from "../context.ts";
-import { GithubWebhookController } from "./github_webhook/mod.ts";
+import { DeployApprovalWebhookController } from "./github_webhook/mod.ts";
 
 export async function initControllers(
   context: Context,
@@ -17,13 +17,13 @@ export async function initControllers(
     services: {
       config,
       github,
-    }
+    },
   } = context;
   const error = new ErrorController();
   const health = new HealthController();
   const isHtml = new IsHtmlController();
   const log = new LogController();
-  const githubWebhook = new GithubWebhookController(config, github)
+  const githubWebhook = new DeployApprovalWebhookController(config, github);
   const notFound = new NotFoundController();
 
   await error.use(app);

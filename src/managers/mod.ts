@@ -1,7 +1,7 @@
 import { Repositories } from "../repositories/mod.ts";
 
 export type Managers = {
-  dummy: unknown,
+  dummy: unknown;
 };
 
 export async function initManagers(_repositories: Repositories) {
