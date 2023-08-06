@@ -1,0 +1,10 @@
+name: Test The Approval Workflow
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    name: Approval Test
+    runs-on: [ubuntu-latest]
+    environment: testing
+    steps:
+    - run: echo "Success!" >> $GITHUB_STEP_SUMMARY

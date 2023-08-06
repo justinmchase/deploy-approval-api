@@ -1,0 +1,15 @@
+name: Deployment Approval
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: string
+
+jobs:
+  test:
+    name: Send Approvals
+    runs-on: [ubuntu-latest]
+    steps:
+    - run: echo "# Creating Approvals for \`$ENVIRONMENT\`" >> $GITHUB_STEP_SUMMARY
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
