@@ -1,1 +1,1 @@
-console.log('hello world!')
+import "./src/mod.ts";
