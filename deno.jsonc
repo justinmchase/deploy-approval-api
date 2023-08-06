@@ -1,9 +1,9 @@
 {
   "tasks": {
-    "dev": "deno run --watch -A main.ts web"
+    "dev": "deno run --watch -A main.ts"
   },
   "imports": {
     "std/": "https://deno.land/std@0.197.0/",
-    "grove/": "https://deno.land/x/grove@0.4.3/",
+    "grove/": "https://deno.land/x/grove@0.4.5/",
   }
 }
