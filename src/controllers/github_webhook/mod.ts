@@ -18,6 +18,7 @@ export class DeployApprovalWebhookController
   ): Promise<void> {
     const {
       deployment: { ref },
+      deployment,
       installation: { id: installationId },
       repository,
     } = event;
@@ -44,6 +45,7 @@ export class DeployApprovalWebhookController
         client,
         path,
         repository,
+        deployment
       );
       await github_api.api.repos.actions.workflows.dispatches.create({
         client,
@@ -71,6 +73,7 @@ export class DeployApprovalWebhookController
     client: github_api.GitHubClient,
     path: string,
     repository: github_api.GitHubRepository,
+    deployment: github_api.GitHubDeployment,
   ) {
     const contents = await github_api.api.repos.contents.get({
       client,
@@ -81,15 +84,17 @@ export class DeployApprovalWebhookController
 
     // deno-lint-ignore no-explicit-any
     const workflow = YAML.parse(yaml) as any;
-    console.log({ workflow });
+    const inputs = {} as SerializableRecord;
     for (
-      const [k, v] of Object.entries(
+      // deno-lint-ignore no-explicit-any
+      const [k, v] of Object.entries<any>(
         workflow?.on?.workflow_dispatch?.inputs ?? {},
       )
     ) {
-      console.log({ k, v });
+      if (k === "environment" && v?.type === "string") {
+        inputs.environment = deployment.environment
+      }
     }
-
-    return {};
+    return inputs;
   }
 }

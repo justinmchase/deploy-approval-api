@@ -4,6 +4,7 @@ on:
     inputs:
       environment:
         type: string
+        required: true
 
 jobs:
   test:
