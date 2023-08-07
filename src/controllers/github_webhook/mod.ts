@@ -6,11 +6,6 @@ import {
   Response,
 } from "grove/mod.ts";
 import { Context, State } from "../../context.ts";
-import {
-  GitHubClient,
-  GitHubFileContent,
-  GitHubRepository,
-} from "https://deno.land/x/github_api@0.5.0-pre.11/mod.ts";
 import * as YAML from "yaml/src/index.ts";
 
 export class DeployApprovalWebhookController
@@ -47,8 +42,8 @@ export class DeployApprovalWebhookController
       const inputs = await this.getWorkflowInput(
         client,
         path,
-        repository
-      )
+        repository,
+      );
       await github_api.api.repos.actions.workflows.dispatches.create({
         client,
         ref,
@@ -63,7 +58,7 @@ export class DeployApprovalWebhookController
           ref,
           repository: { full_name: repository.full_name },
           workflowId,
-          approvalWorkflow,
+          path,
         },
       );
     }
@@ -72,15 +67,15 @@ export class DeployApprovalWebhookController
   }
 
   private async getWorkflowInput(
-    client: GitHubClient,
+    client: github_api.GitHubClient,
     path: string,
-    repository: GitHubRepository,
+    repository: github_api.GitHubRepository,
   ) {
     const contents = await github_api.api.repos.contents.get({
       client,
       path,
       repository,
-    }) as GitHubFileContent;
+    }) as github_api.GitHubFileContent;
     const yaml = atob(contents.content);
     const workflow = YAML.parse(yaml);
     console.log({ workflow });
@@ -92,6 +87,6 @@ export class DeployApprovalWebhookController
       console.log({ k, v });
     }
 
-    return {}
+    return {};
   }
 }
