@@ -6,7 +6,8 @@ import {
   Response,
 } from "grove/mod.ts";
 import { Context, State } from "../../context.ts";
-import * as YAML from "yaml/src/index.ts";
+import * as YAML from "std/yaml/mod.ts";
+import { SerializableRecord } from "https://deno.land/x/serializable@0.3.4/mod.ts";
 
 export class DeployApprovalWebhookController
   extends GithubWebhookController<Context, State> {
@@ -77,7 +78,9 @@ export class DeployApprovalWebhookController
       repository,
     }) as github_api.GitHubFileContent;
     const yaml = atob(contents.content);
-    const workflow = YAML.parse(yaml);
+
+    // deno-lint-ignore no-explicit-any
+    const workflow = YAML.parse(yaml) as any;
     console.log({ workflow });
     for (
       const [k, v] of Object.entries(
