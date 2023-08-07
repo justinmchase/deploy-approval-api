@@ -37,7 +37,7 @@ export class DeployApprovalWebhookController
         },
       );
     } else {
-      const { id: workflowId } = approvalWorkflow;
+      const { id: workflowId,  } = approvalWorkflow;
       await github_api.api.repos.actions.workflows.dispatches.create({
         client,
         ref,
@@ -52,6 +52,7 @@ export class DeployApprovalWebhookController
           ref,
           repository: { full_name: repository.full_name },
           workflowId,
+          approvalWorkflow
         },
       );
     }
