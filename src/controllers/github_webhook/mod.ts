@@ -6,6 +6,12 @@ import {
   Response,
 } from "grove/mod.ts";
 import { Context, State } from "../../context.ts";
+import {
+  GitHubClient,
+  GitHubFileContent,
+  GitHubRepository,
+} from "https://deno.land/x/github_api@0.5.0-pre.11/mod.ts";
+import * as YAML from "yaml/src/index.ts";
 
 export class DeployApprovalWebhookController
   extends GithubWebhookController<Context, State> {
@@ -37,13 +43,18 @@ export class DeployApprovalWebhookController
         },
       );
     } else {
-      const { id: workflowId,  } = approvalWorkflow;
+      const { id: workflowId, path } = approvalWorkflow;
+      const inputs = await this.getWorkflowInput(
+        client,
+        path,
+        repository
+      )
       await github_api.api.repos.actions.workflows.dispatches.create({
         client,
         ref,
         repository,
         workflowId,
-        inputs: {},
+        inputs,
       });
       log.info(
         "approval_workflow_dispatched",
@@ -52,11 +63,35 @@ export class DeployApprovalWebhookController
           ref,
           repository: { full_name: repository.full_name },
           workflowId,
-          approvalWorkflow
+          approvalWorkflow,
         },
       );
     }
 
     await super.handleDeploymentProtectionRuleEvent(log, res, event);
+  }
+
+  private async getWorkflowInput(
+    client: GitHubClient,
+    path: string,
+    repository: GitHubRepository,
+  ) {
+    const contents = await github_api.api.repos.contents.get({
+      client,
+      path,
+      repository,
+    }) as GitHubFileContent;
+    const yaml = atob(contents.content);
+    const workflow = YAML.parse(yaml);
+    console.log({ workflow });
+    for (
+      const [k, v] of Object.entries(
+        workflow?.on?.workflow_dispatch?.inputs ?? {},
+      )
+    ) {
+      console.log({ k, v });
+    }
+
+    return {}
   }
 }
