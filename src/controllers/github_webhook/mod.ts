@@ -21,9 +21,7 @@ export class DeployApprovalWebhookController
     } = event;
     await log.debug("custom logic...", "goes here...");
     const client = await this.github.client(installationId);
-    const workflows = await github_api.api.repos.actions.workflows.list<
-      github_api.GitHubWorkflow
-    >({
+    const workflows = await github_api.api.repos.actions.workflows.list({
       client,
       repository,
     });
