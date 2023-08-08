@@ -5,6 +5,7 @@ export class ConfigService {
   public readonly githubPrivateKey: string;
   public readonly githubWebhookPath: string;
   public readonly githubWebhookSecret?: string;
+  public readonly mongoConnectionString: string;
   constructor(env: Record<string, string>) {
     this.githubAppId = readInt(env, "GITHUB_APP_ID", 372035);
     this.githubPrivateKey = readRequiredString(env, "GITHUB_PRIVATE_KEY");
@@ -14,5 +15,9 @@ export class ConfigService {
       "/github_webhook",
     );
     this.githubWebhookSecret = readString(env, "GITHUB_WEBHOOK_SECRET");
+    this.mongoConnectionString = readRequiredString(
+      env,
+      "MONGO_CONNECTION_STRING",
+    );
   }
 }

@@ -45,7 +45,7 @@ export class DeployApprovalWebhookController
         client,
         path,
         repository,
-        deployment
+        deployment,
       );
       await github_api.api.repos.actions.workflows.dispatches.create({
         client,
@@ -92,7 +92,7 @@ export class DeployApprovalWebhookController
       )
     ) {
       if (k === "environment" && v?.type === "string") {
-        inputs.environment = deployment.environment
+        inputs.environment = deployment.environment;
       }
     }
     return inputs;
