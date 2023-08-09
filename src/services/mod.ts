@@ -13,7 +13,7 @@ export async function initServices(log: ILogger): Promise<Services> {
   const env = await getEnv();
   const config = new ConfigService(env);
   const github = await GitHubService.create(log, config);
-  const mongo = await MongoService.create(log, config.mongoConnectionString);
+  const mongo = await MongoService.create(log, config);
   return {
     config,
     github,

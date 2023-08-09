@@ -9,7 +9,7 @@ async function initContext(): Promise<Context> {
   const log = new ConsoleLogger();
   const services = await initServices(log);
   const repositories = await initRepositories(services);
-  const managers = await initManagers(repositories);
+  const managers = await initManagers(services, repositories);
   return {
     log,
     services,

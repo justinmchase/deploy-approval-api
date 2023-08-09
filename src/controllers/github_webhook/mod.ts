@@ -1,30 +1,54 @@
 import { basename } from "std/path/mod.ts";
 import {
-  github_api,
+  github_api as gh,
+  GitHubService,
   GithubWebhookController,
+  IGitHubWebhookConfig,
   ILogger,
+  NotFoundError,
   Response,
 } from "grove/mod.ts";
 import { Context, State } from "../../context.ts";
-import * as YAML from "std/yaml/mod.ts";
-import { SerializableRecord } from "https://deno.land/x/serializable@0.3.4/mod.ts";
+import { DeploymentManager } from "../../managers/deployment/mod.ts";
 
-export class DeployApprovalWebhookController
-  extends GithubWebhookController<Context, State> {
+export class DeployApprovalWebhookController extends GithubWebhookController<Context, State> {
+    constructor(
+      config: IGitHubWebhookConfig,
+      github: GitHubService,
+      private readonly deployments: DeploymentManager
+    ) {
+      super(config, github)
+    }
+
   protected override async handleDeploymentProtectionRuleEvent(
     log: ILogger,
     res: Response,
-    event: github_api.GitHubDeploymentProtectionRuleEvent,
+    event: gh.GitHubDeploymentProtectionRuleEvent,
   ): Promise<void> {
     const {
-      deployment: { ref },
+      deployment_callback_url,
       deployment,
       installation: { id: installationId },
       repository,
     } = event;
     await log.debug("custom logic...", "goes here...");
+    // For some reason the run isn't included in the payload, the only way
+    // to get the runId is to get it out of the callback url.
+    const runId =  parseInt(new URL(deployment_callback_url).pathname.split("/")[6]);
     const client = await this.github.client(installationId);
-    const workflows = await github_api.api.repos.actions.workflows.list({
+    const workflow = await this.getApprovalWorkflow(client, repository);
+    await this.deployments.createDeploymentApprovals(
+      client,
+      repository,
+      deployment,
+      workflow,
+      runId,
+    )
+    await super.handleDeploymentProtectionRuleEvent(log, res, event);
+  }
+
+  private async getApprovalWorkflow(client: gh.GitHubClient, repository: gh.GitHubRepository) {
+    const workflows = await gh.api.repos.actions.workflows.list({
       client,
       repository,
     });
@@ -32,69 +56,8 @@ export class DeployApprovalWebhookController
       basename(w.path) === "approval.yml"
     );
     if (!approvalWorkflow || approvalWorkflow.state !== "active") {
-      log.info(
-        "approval_workflow_not_available",
-        "approval workflow is not available",
-        {
-          approvalWorkflow,
-        },
-      );
-    } else {
-      const { id: workflowId, path } = approvalWorkflow;
-      const inputs = await this.getWorkflowInput(
-        client,
-        path,
-        repository,
-        deployment,
-      );
-      await github_api.api.repos.actions.workflows.dispatches.create({
-        client,
-        ref,
-        repository,
-        workflowId,
-        inputs,
-      });
-      log.info(
-        "approval_workflow_dispatched",
-        `approval workflow ${workflowId} invoked for ${repository.full_name}`,
-        {
-          ref,
-          repository: { full_name: repository.full_name },
-          workflowId,
-          path,
-        },
-      );
+      throw new NotFoundError("GitHubWorkflow", "approval.yml")
     }
-
-    await super.handleDeploymentProtectionRuleEvent(log, res, event);
-  }
-
-  private async getWorkflowInput(
-    client: github_api.GitHubClient,
-    path: string,
-    repository: github_api.GitHubRepository,
-    deployment: github_api.GitHubDeployment,
-  ) {
-    const contents = await github_api.api.repos.contents.get({
-      client,
-      path,
-      repository,
-    }) as github_api.GitHubFileContent;
-    const yaml = atob(contents.content);
-
-    // deno-lint-ignore no-explicit-any
-    const workflow = YAML.parse(yaml) as any;
-    const inputs = {} as SerializableRecord;
-    for (
-      // deno-lint-ignore no-explicit-any
-      const [k, v] of Object.entries<any>(
-        workflow?.on?.workflow_dispatch?.inputs ?? {},
-      )
-    ) {
-      if (k === "environment" && v?.type === "string") {
-        inputs.environment = deployment.environment;
-      }
-    }
-    return inputs;
+    return approvalWorkflow;
   }
 }

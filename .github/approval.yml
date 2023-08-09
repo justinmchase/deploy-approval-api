@@ -1,0 +1,12 @@
+groups:
+  - id: tier1
+    name: Tier 1
+
+  - id: tier2
+    name: Tier 2
+
+environments:
+  testing:
+    groups:
+      - tier1
+      - tier2

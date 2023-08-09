@@ -5,6 +5,18 @@ on:
       environment:
         type: string
         required: true
+      group-id:
+        type: string
+        required: true
+      group-name:
+        type: string
+        required: true
+      approve-url:
+        type: string
+        required: true
+      reject-url:
+        type: string
+        required: true
 
 jobs:
   test:
