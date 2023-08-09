@@ -20,7 +20,12 @@ export async function initManagers(
     repositories.approvalGroups,
     repositories.approvals,
   );
+  const approvalGroups = new ApprovalGroupManager(
+    repositories.approvalGroups,
+    repositories.approvals,
+  );
   return await {
     deployments,
+    approvalGroups,
   };
 }
