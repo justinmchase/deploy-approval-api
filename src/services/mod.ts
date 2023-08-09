@@ -1,4 +1,4 @@
-import { getEnv, GitHubService, MongoService, ILogger } from "grove/mod.ts";
+import { getEnv, GitHubService, ILogger, MongoService } from "grove/mod.ts";
 import { ConfigService } from "./config/mod.ts";
 
 export * from "./config/mod.ts";

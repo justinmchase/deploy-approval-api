@@ -1,13 +1,13 @@
-import { MongoService, NotFoundError, mongo } from "grove/mod.ts";
+import { mongo, MongoService, NotFoundError } from "grove/mod.ts";
 import { github_api as gh } from "grove/mod.ts";
 import { IDeployment } from "../../models/mod.ts";
 import { ApprovalState } from "../../models/approval.model.ts";
 
 export type UpsertDeployment = {
-  repository: gh.GitHubRepository,
-  deployment: gh.GitHubDeployment,
-  runId: number
-}
+  repository: gh.GitHubRepository;
+  deployment: gh.GitHubDeployment;
+  runId: number;
+};
 
 export class DeploymentRepository {
   private readonly deployments: mongo.Collection<IDeployment>;
@@ -21,7 +21,7 @@ export class DeploymentRepository {
     const { id: deploymentId, environment, ref } = deployment;
     const upserted = await this.deployments.findAndModify(
       {
-        deploymentId
+        deploymentId,
       },
       {
         upsert: true,
@@ -31,26 +31,28 @@ export class DeploymentRepository {
             deploymentId,
             environment,
             ref,
-            createdAt: new Date()
+            createdAt: new Date(),
           },
           $set: {
             runId,
-            updatedAt: new Date()
-          }
-        }
-      }
-    )
+            updatedAt: new Date(),
+          },
+        },
+      },
+    );
     if (!upserted) {
-      throw new NotFoundError("IDeployment", `${deploymentId}`)
+      throw new NotFoundError("IDeployment", `${deploymentId}`);
     }
     return upserted;
   }
 
-  public async checkState(_deployment: IDeployment): Promise<{ state?: ApprovalState, comment?: string }> {
+  public async checkState(
+    _deployment: IDeployment,
+  ): Promise<{ state?: ApprovalState; comment?: string }> {
     // await this.deployments.aggregate([
 
     // ])
 
-    return await {}
+    return await {};
   }
 }

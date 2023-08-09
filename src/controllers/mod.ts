@@ -9,6 +9,7 @@ import {
 import { Context, State } from "../context.ts";
 import { DeployApprovalWebhookController } from "./github_webhook/mod.ts";
 import { SiteController } from "./site/mod.ts";
+import { ApproveController } from "./approve/mod.ts";
 
 export async function initControllers(
   context: Context,
@@ -19,12 +20,20 @@ export async function initControllers(
       config,
       github,
     },
+    managers: {
+      deployments,
+    },
   } = context;
   const error = new ErrorController();
   const health = new HealthController();
   const isHtml = new IsHtmlController();
   const log = new LogController();
-  const githubWebhook = new DeployApprovalWebhookController(config, github);
+  const githubWebhook = new DeployApprovalWebhookController(
+    config,
+    github,
+    deployments,
+  );
+  const approve = new ApproveController();
   const site = new SiteController();
   const notFound = new NotFoundController();
 
@@ -33,6 +42,7 @@ export async function initControllers(
   await isHtml.use(app);
   await log.use(app);
   await githubWebhook.use(app);
+  await approve.use(app);
   await site.use(app);
 
   // If all else fails 404

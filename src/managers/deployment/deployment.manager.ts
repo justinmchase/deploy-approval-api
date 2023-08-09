@@ -1,8 +1,10 @@
 import { github_api as gh } from "grove/mod.ts";
 import { DeploymentRepository } from "../../repositories/deployments/mod.ts";
 import { DeploymentScope } from "./deployment.scope.ts";
-import { ApprovalGroupRepository, ApprovalRepository } from "../../repositories/mod.ts";
-
+import {
+  ApprovalGroupRepository,
+  ApprovalRepository,
+} from "../../repositories/mod.ts";
 
 export class DeploymentManager {
   constructor(
@@ -27,7 +29,7 @@ export class DeploymentManager {
       this.approvalGroups,
       this.approvals,
       runId,
-    )
+    );
     await scope.createDeployment();
   }
 }

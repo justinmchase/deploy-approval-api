@@ -1,14 +1,17 @@
-import { MongoService, NotFoundError, mongo } from "grove/mod.ts";
-import { IDeployment, IApprovalGroup, ApprovalGroupConfig } from "../../models/mod.ts";
+import { mongo, MongoService, NotFoundError } from "grove/mod.ts";
+import {
+  ApprovalGroupConfig,
+  IApprovalGroup,
+  IDeployment,
+} from "../../models/mod.ts";
 
 export type ApprovalGroupUpsert = {
-  
-  deployment: IDeployment
-  group: ApprovalGroupConfig
-}
+  deployment: IDeployment;
+  group: ApprovalGroupConfig;
+};
 
 export class ApprovalGroupRepository {
-  private readonly approvalGroups: mongo.Collection<IApprovalGroup>
+  private readonly approvalGroups: mongo.Collection<IApprovalGroup>;
   constructor(mongo: MongoService) {
     this.approvalGroups = mongo.collection("approvalGroups");
   }
@@ -20,7 +23,7 @@ export class ApprovalGroupRepository {
     const upserted = await this.approvalGroups.findAndModify(
       {
         deploymentId,
-        id
+        id,
       },
       {
         upsert: true,
@@ -28,17 +31,17 @@ export class ApprovalGroupRepository {
           $setOnInsert: {
             deploymentId,
             id,
-            createdAt: new Date()
+            createdAt: new Date(),
           },
           $set: {
             name,
-            updatedAt: new Date()
+            updatedAt: new Date(),
           },
-        }
-      }
-    )
+        },
+      },
+    );
     if (!upserted) {
-      throw new NotFoundError("IApprovalGroup", `${deploymentId}.${id}`)
+      throw new NotFoundError("IApprovalGroup", `${deploymentId}.${id}`);
     }
     return upserted;
   }
