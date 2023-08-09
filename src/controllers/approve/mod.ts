@@ -12,34 +12,28 @@ export class ApproveController implements Controller<Context, State> {
   public async use(app: Application<State>): Promise<void> {
     const router = new Router();
     router.get(
-      "/approve/{approvalGroupId}",
-      async (context, _next) => {
-        console.log({
-          a: context.captures,
-          b: context.matched,
-          c: context.params,
-        });
-        await this.approve(context.request, context.response);
-      },
+      "/approve/:approvalGroupId",
+      async (context, _next) =>
+        await this.approve(context.params.approvalGroupId, context.response),
     );
     router.get(
-      "/reject/{approvalGroupId}",
+      "/reject/:approvalGroupId",
       async (context, _next) =>
-        await this.reject(context.request, context.response),
+        await this.reject(context.params.approvalGroupId, context.response),
     );
     app.use(router.allowedMethods());
     app.use(router.routes());
     await undefined;
   }
 
-  private async approve(_req: Request, res: Response) {
+  private async approve(approvalGroupId: string, res: Response) {
     res.status = Status.OK;
     res.body = { ok: true, state: "approved" };
     res.headers.set("Content-Type", "application/json");
     await undefined;
   }
 
-  private async reject(_req: Request, res: Response) {
+  private async reject(approvalGroupId: string, res: Response) {
     res.status = Status.OK;
     res.body = { ok: true, state: "rejected" };
     res.headers.set("Content-Type", "application/json");
