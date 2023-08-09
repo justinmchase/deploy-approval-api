@@ -20,7 +20,7 @@ export class ApprovalRepository {
         state,
         comment,
         createdAt: new Date(),
-      }
+      },
     );
     const approval = await this.approvals.findOne({ _id: approvalId });
     if (!approval) {

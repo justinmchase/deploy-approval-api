@@ -16,6 +16,19 @@ export class ApprovalGroupRepository {
     this.approvalGroups = mongo.collection("approvalGroups");
   }
 
+  public async get(approvalGroupId: mongo.ObjectId) {
+    const approvalGroup = await this.approvalGroups.findOne({
+      _id: approvalGroupId,
+    });
+    if (!approvalGroup) {
+      throw new NotFoundError(
+        "IApprovalGroup",
+        `${approvalGroupId.toHexString()}`,
+      );
+    }
+    return approvalGroup;
+  }
+
   public async upsert(info: ApprovalGroupUpsert) {
     const { deployment, group } = info;
     const { _id: deploymentId } = deployment;
