@@ -25,6 +25,7 @@ export class DeploymentRepository {
       },
       {
         upsert: true,
+        new: true,
         update: {
           $setOnInsert: {
             repository: full_name,

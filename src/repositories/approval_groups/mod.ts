@@ -27,6 +27,7 @@ export class ApprovalGroupRepository {
       },
       {
         upsert: true,
+        new: true,
         update: {
           $setOnInsert: {
             deploymentId,
