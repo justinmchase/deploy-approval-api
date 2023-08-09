@@ -34,7 +34,11 @@ export async function initControllers(
     github,
     deployments,
   );
-  const approve = new ApproveController(deployments, approvalGroups);
+  const approve = new ApproveController(
+    github,
+    deployments,
+    approvalGroups,
+  );
   const site = new SiteController();
   const notFound = new NotFoundController();
 

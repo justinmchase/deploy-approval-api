@@ -45,6 +45,7 @@ export class DeployApprovalWebhookController
       repository,
       deployment,
       workflow,
+      installationId,
       runId,
     );
     await super.handleDeploymentProtectionRuleEvent(log, res, event);

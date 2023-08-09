@@ -1,6 +1,7 @@
 import {
   Application,
   Controller,
+  GitHubService,
   mongo,
   Response,
   Router,
@@ -12,6 +13,7 @@ import { ApprovalState } from "../../models/approval.model.ts";
 
 export class ApproveController implements Controller<Context, State> {
   constructor(
+    private readonly github: GitHubService,
     private readonly deployments: DeploymentManager,
     private readonly approvalGroups: ApprovalGroupManager,
   ) {
@@ -52,6 +54,12 @@ export class ApproveController implements Controller<Context, State> {
     const approval = await this.approvalGroups.approve(
       approvalGroup,
       state,
+    );
+    const deployment = await this.deployments.get(approvalGroup.deploymentId);
+    const client = await this.github.client(deployment.installationId);
+    await this.deployments.check(
+      client,
+      deployment,
     );
     res.status = Status.OK;
     res.body = {

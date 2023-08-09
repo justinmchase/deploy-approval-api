@@ -8,7 +8,6 @@ import { SerializableRecord } from "serializable";
 import { ApprovalConfigSchema, ApprovalGroupConfig } from "../../models/mod.ts";
 import { IDeployment } from "../../models/mod.ts";
 import { ApprovalGroupRepository } from "../../repositories/approval_groups/mod.ts";
-import { ApprovalState } from "../../models/approval.model.ts";
 
 export class DeploymentScope {
   constructor(
@@ -19,6 +18,7 @@ export class DeploymentScope {
     private readonly deployments: DeploymentRepository,
     private readonly approvalGroups: ApprovalGroupRepository,
     private readonly approvals: ApprovalRepository,
+    private readonly installationId: number,
     private readonly runId: number,
   ) {}
 
@@ -26,6 +26,7 @@ export class DeploymentScope {
     const deployment = await this.deployments.upsert({
       deployment: this.deployment,
       repository: this.repository,
+      installationId: this.installationId,
       runId: this.runId,
     });
     const { environment } = this.deployment;
@@ -45,27 +46,7 @@ export class DeploymentScope {
       // Creates a default group and automatically approves it.
       await this.createDefaultApprovalGroup(deployment);
     }
-
-    await this.checkApproval(deployment);
-  }
-
-  public async checkApproval(deployment: IDeployment) {
-    // 1. see if all approvals for the current deployment are approved
-    const { state, comment } = await this.deployments.checkState(deployment);
-    if (state) {
-      await this.approveDeployment(state, comment ?? "Deployment Approved");
-    }
-  }
-
-  private async approveDeployment(state: ApprovalState, comment: string) {
-    await gh.api.repos.actions.runs.deployment_protection_rule.create({
-      client: this.client,
-      repository: this.repository,
-      runId: this.runId,
-      environmentName: this.deployment.environment,
-      state,
-      comment,
-    });
+    return deployment;
   }
 
   private async createApprovalGroup(
@@ -102,7 +83,6 @@ export class DeploymentScope {
       },
     });
     await this.approvals.create(
-      deployment,
       approvalGroup,
       "approved",
       "No approval groups configured. Auto-approved.",

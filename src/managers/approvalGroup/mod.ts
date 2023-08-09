@@ -5,7 +5,6 @@ import {
   ApprovalGroupRepository,
   ApprovalRepository,
 } from "../../repositories/mod.ts";
-import { IDeployment } from "../../models/deployment.model.ts";
 
 export class ApprovalGroupManager {
   constructor(
