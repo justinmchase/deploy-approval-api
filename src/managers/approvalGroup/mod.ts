@@ -5,6 +5,7 @@ import {
   ApprovalGroupRepository,
   ApprovalRepository,
 } from "../../repositories/mod.ts";
+import { IDeployment } from "../../models/deployment.model.ts";
 
 export class ApprovalGroupManager {
   constructor(
@@ -20,6 +21,9 @@ export class ApprovalGroupManager {
     approvalGroup: IApprovalGroup,
     state: ApprovalState,
   ) {
-    return await this.approvals.create(approvalGroup, state);
+    return await this.approvals.create(
+      approvalGroup,
+      state,
+    );
   }
 }

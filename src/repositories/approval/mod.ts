@@ -13,9 +13,10 @@ export class ApprovalRepository {
     state: ApprovalState,
     comment?: string,
   ) {
-    const { _id: approvalGroupId } = group;
+    const { _id: approvalGroupId, deploymentId } = group;
     const approvalId = await this.approvals.insertOne(
       {
+        deploymentId,
         approvalGroupId,
         state,
         comment,

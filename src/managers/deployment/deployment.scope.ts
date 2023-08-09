@@ -102,6 +102,7 @@ export class DeploymentScope {
       },
     });
     await this.approvals.create(
+      deployment,
       approvalGroup,
       "approved",
       "No approval groups configured. Auto-approved.",
