@@ -23,6 +23,13 @@ jobs:
     name: Send Approvals
     runs-on: [ubuntu-latest]
     steps:
-    - run: echo "# Creating Approvals for \`$ENVIRONMENT\`" >> $GITHUB_STEP_SUMMARY
+    - run: |
+        echo "# $GROUP_NAME Approvals for \`$ENVIRONMENT\`" >> $GITHUB_STEP_SUMMARY
+        echo "* [Approve]($APPROVE_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "* [Reject]($REJECT_URL)" >> $GITHUB_STEP_SUMMARY
       env:
         ENVIRONMENT: ${{ inputs.environment }}
+        GROUP_ID: ${{ inputs.group-id }}
+        GROUP_NAME: ${{ inputs.group-name }}
+        APPROVE_URL: ${{ inputs.approve-url }}
+        REJECT_URL: ${{ inputs.reject-url }}
