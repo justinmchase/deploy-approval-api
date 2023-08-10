@@ -11,7 +11,7 @@ export class AzurePublisherDomainController implements Controller<Context, State
   public async use(app: Application<State>): Promise<void> {
     const router = new Router();
     router.get(
-      "/ce608137-10fc-4b3e-824b-a3b601a2f424",
+      "/.well-known/microsoft-identity-association.json",
       async (context, _next) => await this.handler(context.response),
     );
     app.use(router.allowedMethods());
