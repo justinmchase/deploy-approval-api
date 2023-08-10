@@ -6,8 +6,10 @@ import {
   Status,
 } from "grove/mod.ts";
 import { Context, State } from "../../context.ts";
+import { ConfigService } from "../../services/mod.ts";
 
 export class AzurePublisherDomainController implements Controller<Context, State> {
+  constructor(private readonly config: ConfigService) {}
   public async use(app: Application<State>): Promise<void> {
     const router = new Router();
     router.get(
@@ -21,13 +23,13 @@ export class AzurePublisherDomainController implements Controller<Context, State
 
   private async handler(res: Response) {
     res.status = Status.OK;
-    res.body = `{
-      "associatedApplications": [
+    res.body = {
+      associatedApplications: [
         {
-          "applicationId": "ce608137-10fc-4b3e-824b-a3b601a2f424"
+          applicationId: this.config.azureClientId
         }
       ]
-    }`
+    }
     res.headers.set("Content-Type", "application/json");
     await undefined;
   }

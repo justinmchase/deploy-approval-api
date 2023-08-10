@@ -40,7 +40,7 @@ export async function initControllers(
     deployments,
     approvalGroups,
   );
-  const azure = new AzurePublisherDomainController();
+  const azure = new AzurePublisherDomainController(config);
   const site = new SiteController();
   const notFound = new NotFoundController();
 
