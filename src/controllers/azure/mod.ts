@@ -28,7 +28,7 @@ export class AzurePublisherDomainController implements Controller<Context, State
         }
       ]
     }`
-    res.headers.set("Content-Type", "application/html");
+    res.headers.set("Content-Type", "application/json");
     await undefined;
   }
 }
