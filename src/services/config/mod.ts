@@ -8,6 +8,7 @@ export class ConfigService {
   public readonly mongoConnectionString: string;
   public readonly azureClientId: string;
   public readonly azureClientSecret?: string;
+  public readonly appOrigin: string;
   constructor(env: Record<string, string>) {
     this.githubAppId = readInt(env, "GITHUB_APP_ID", 372035);
     this.githubPrivateKey = readRequiredString(env, "GITHUB_PRIVATE_KEY");
@@ -23,5 +24,6 @@ export class ConfigService {
     );
     this.azureClientId = readString(env, "AZURE_CLIENT_ID", "ce608137-10fc-4b3e-824b-a3b601a2f424");
     this.azureClientSecret = readString(env, "AZURE_CLIENT_SECRET");
+    this.appOrigin = readString(env, "APP_ORIGIN", "localhost:8080")
   }
 }

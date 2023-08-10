@@ -12,17 +12,16 @@ export class SiteController implements Controller<Context, State> {
     const router = new Router();
     router.get(
       "/",
-      async (context, _next) => await this.handler(context.response),
+      (context, _next) => this.home(context.response),
     );
     app.use(router.allowedMethods());
     app.use(router.routes());
     await undefined;
   }
 
-  private async handler(res: Response) {
+  private home(res: Response) {
     res.status = Status.OK;
     res.body = { ok: true };
-    res.headers.set("Content-Type", "application/json");
-    await undefined;
+    res.headers.set("Content-Type", "application/javascript");
   }
 }

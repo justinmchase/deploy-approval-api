@@ -67,9 +67,9 @@ export class DeploymentScope {
         "group-id": group.id,
         "group-name": group.name,
         "approve-url":
-          `http://deploy-approval.deno.dev/approve/${approvalGroup._id}?state=approved`,
+          `http://deploy-approval.app/approval/${approvalGroup._id}?state=approved`,
         "reject-url":
-          `http://deploy-approval.deno.dev/reject/${approvalGroup._id}?state=rejected`,
+          `http://deploy-approval.app/approval/${approvalGroup._id}?state=rejected`,
       },
     });
   }
