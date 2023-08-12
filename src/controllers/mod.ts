@@ -26,6 +26,7 @@ export async function initControllers(
     managers: {
       deployments,
       approvalGroups,
+      approvals,
     },
   } = context;
   const error = new ErrorController();
@@ -44,6 +45,7 @@ export async function initControllers(
     github,
     deployments,
     approvalGroups,
+    approvals,
   );
   const notFound = new NotFoundController();
 

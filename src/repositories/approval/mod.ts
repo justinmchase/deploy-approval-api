@@ -8,6 +8,15 @@ export class ApprovalRepository {
     this.approvals = mongo.collection<IApproval>("approvals");
   }
 
+  public async getFor(approver: User, approvalGroup: IApprovalGroup) {
+    return await this.approvals.findOne(
+      {
+        approvalGroupId: approvalGroup._id,
+        "approver.id": approver.id,
+      }
+    )
+  }
+
   public async create(
     approver: User,
     group: IApprovalGroup,

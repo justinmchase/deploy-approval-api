@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { User } from "../../context.ts";
+import { User } from "../../models/user.model.ts";
     
 const azureTenantId = "22dddbf3-6a10-486d-94dc-b3eca6a4d13e";
 const JWKS = createRemoteJWKSet(new URL(`https://login.microsoftonline.com/${azureTenantId}/discovery/keys`));

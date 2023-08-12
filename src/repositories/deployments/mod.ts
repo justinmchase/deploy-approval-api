@@ -18,6 +18,8 @@ export type ResultType = {
   count: number;
 };
 
+export type ApprovalCheck = { state?: ApprovalState; results: ResultType[] }
+
 export class DeploymentRepository {
   private readonly deployments: mongo.Collection<IDeployment>;
   constructor(mongo: MongoService) {
@@ -72,7 +74,7 @@ export class DeploymentRepository {
 
   public async check(
     deployment: IDeployment,
-  ): Promise<{ state?: ApprovalState; results: ResultType[] }> {
+  ): Promise<ApprovalCheck> {
     const { _id: deploymentId } = deployment;
     const results = await this.deployments.aggregate<ResultType>([
       {

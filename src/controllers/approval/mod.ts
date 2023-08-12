@@ -7,15 +7,18 @@ import {
 import { assertArrayIncludes } from "std/assert/assert_array_includes.ts";
 import { Context, State } from "../../context.ts";
 import { ApprovalGroupManager, DeploymentManager } from "../../managers/mod.ts";
-import { ApprovalState } from "../../models/approval.model.ts";
+import { ApprovalState, IApproval } from "../../models/approval.model.ts";
 import { assertExists } from "https://deno.land/std@0.195.0/assert/assert_exists.ts";
-import { User } from "../../models/mod.ts";
+import { IDeployment, User } from "../../models/mod.ts";
+import { ApprovalManager } from "../../managers/mod.ts";
+import { ApprovalCheck } from "../../repositories/mod.ts";
 
 export class ApprovalController implements Controller<Context, State> {
   constructor(
     private readonly github: GitHubService,
     private readonly deployments: DeploymentManager,
     private readonly approvalGroups: ApprovalGroupManager,
+    private readonly approvals: ApprovalManager
   ) {
   }
   public async use(app: oak.Application<State>): Promise<void> {
@@ -27,6 +30,7 @@ export class ApprovalController implements Controller<Context, State> {
         const { approvalGroupId } = context.params;
         assertExists(user);
         await this.get(
+          user,
           new mongo.ObjectId(approvalGroupId),
           context.response,
         );
@@ -53,15 +57,21 @@ export class ApprovalController implements Controller<Context, State> {
   }
 
   private async get(
+    approver: User,
     approvalGroupId: mongo.ObjectId,
     res: oak.Response,
   ) {
     const approvalGroup = await this.approvalGroups.get(approvalGroupId);
+    const approval = await this.approvals.getFor(
+      approver,
+      approvalGroup,
+    );
     const deployment = await this.deployments.get(approvalGroup.deploymentId);
     const check = await this.deployments.check(deployment)
     res.status = oak.Status.OK;
     res.body = {
       ok: true,
+      approval,
       deployment,
       approvalGroup,
       check,
@@ -78,16 +88,29 @@ export class ApprovalController implements Controller<Context, State> {
     const approvalGroup = await this.approvalGroups.get(
       new mongo.ObjectId(approvalGroupId),
     );
-    const approval = await this.approvalGroups.approve(
+    const deployment = await this.deployments.get(approvalGroup.deploymentId);
+    let approval = await this.approvals.getFor(
       approver,
       approvalGroup,
-      approvalState,
     );
-    const deployment = await this.deployments.get(approvalGroup.deploymentId);
-    const check = await this.deployments.check(deployment);
-    if (!deployment.state && check.state) {
-      const client = await this.github.client(deployment.installationId);
-      await this.deployments.approve(client, deployment, check.state);
+    let check: ApprovalCheck
+    if (approval?.state !== approvalState && !deployment.state) {
+      // If the deployment hasn't yet been approved or rejected 
+      // And the user approvalState is different then the existing approval they submitted
+      // ...then submit the new approval and check
+      approval = await this.approvalGroups.approve(
+        approver,
+        approvalGroup,
+        approvalState
+      )
+      check = await this.deployments.check(deployment);
+      if (check.state) {
+        // This approval was the final approver needed, approving the deployment
+        const client = await this.github.client(deployment.installationId);
+        await this.deployments.approve(client, deployment, check.state);
+      }
+    } else {
+      check = await this.deployments.check(deployment);
     }
     res.status = oak.Status.OK;
     res.body = {
