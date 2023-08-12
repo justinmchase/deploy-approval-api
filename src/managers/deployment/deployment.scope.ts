@@ -57,7 +57,7 @@ export class DeploymentScope {
       deployment,
       group,
     });
-    gh.api.repos.actions.workflows.dispatches.create({
+    await gh.api.repos.actions.workflows.dispatches.create({
       client: this.client,
       repository: this.repository,
       ref: this.deployment.ref,

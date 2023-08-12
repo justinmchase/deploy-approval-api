@@ -32,7 +32,6 @@ export class DeployApprovalWebhookController
       installation: { id: installationId },
       repository,
     } = event;
-    await log.debug("custom logic...", "goes here...");
     // For some reason the run isn't included in the payload, the only way
     // to get the runId is to get it out of the callback url.
     const runId = parseInt(

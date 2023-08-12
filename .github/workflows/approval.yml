@@ -11,10 +11,7 @@ on:
       group-name:
         type: string
         required: true
-      approve-url:
-        type: string
-        required: true
-      reject-url:
+      approval-url:
         type: string
         required: true
 
@@ -25,11 +22,9 @@ jobs:
     steps:
     - run: |
         echo "# $GROUP_NAME Approvals for \`$ENVIRONMENT\`" >> $GITHUB_STEP_SUMMARY
-        echo "* [Approve]($APPROVE_URL)" >> $GITHUB_STEP_SUMMARY
-        echo "* [Reject]($REJECT_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "[Approve or Reject]($APPROVAL_URL)" >> $GITHUB_STEP_SUMMARY
       env:
         ENVIRONMENT: ${{ inputs.environment }}
         GROUP_ID: ${{ inputs.group-id }}
         GROUP_NAME: ${{ inputs.group-name }}
-        APPROVE_URL: ${{ inputs.approve-url }}
-        REJECT_URL: ${{ inputs.reject-url }}
+        APPROVAL_URL: ${{ inputs.approval-url }}
