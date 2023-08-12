@@ -1,4 +1,4 @@
-import { readInt, readRequiredString, readString } from "grove/mod.ts";
+import { readInt, readRequiredString, readString } from "grove";
 
 export class ConfigService {
   public readonly githubAppId: number;

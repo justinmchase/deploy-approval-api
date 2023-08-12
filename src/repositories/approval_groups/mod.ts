@@ -1,4 +1,4 @@
-import { mongo, MongoService, NotFoundError } from "grove/mod.ts";
+import { mongo, MongoService, NotFoundError } from "grove";
 import {
   ApprovalGroupConfig,
   IApprovalGroup,

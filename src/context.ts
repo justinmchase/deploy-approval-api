@@ -1,7 +1,8 @@
-import { IContext, IState } from "grove/mod.ts";
+import { IContext, IState } from "grove";
 import { Services } from "./services/mod.ts";
 import { Repositories } from "./repositories/mod.ts";
 import { Managers } from "./managers/mod.ts";
+import { User } from "./models/user.model.ts";
 
 export interface Context extends IContext {
   services: Services;
@@ -10,5 +11,5 @@ export interface Context extends IContext {
 }
 
 export interface State extends IState<Context> {
-  dummy?: string;
+  user?: User
 }

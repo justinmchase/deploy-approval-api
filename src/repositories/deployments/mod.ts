@@ -1,5 +1,4 @@
-import { mongo, MongoService, NotFoundError } from "grove/mod.ts";
-import { github_api as gh } from "grove/mod.ts";
+import { gh, mongo, MongoService, NotFoundError } from "grove";
 import { IDeployment } from "../../models/mod.ts";
 import { ApprovalState } from "../../models/approval.model.ts";
 
@@ -16,6 +15,7 @@ export type ResultType = {
   groupId: string;
   groupName: string;
   state: ApprovalState | null;
+  count: number;
 };
 
 export class DeploymentRepository {
@@ -72,7 +72,7 @@ export class DeploymentRepository {
 
   public async check(
     deployment: IDeployment,
-  ): Promise<{ state?: ApprovalState; comment: string, results: ResultType }> {
+  ): Promise<{ state?: ApprovalState; results: ResultType[] }> {
     const { _id: deploymentId } = deployment;
     const results = await this.deployments.aggregate<ResultType>([
       {
@@ -128,6 +128,9 @@ export class DeploymentRepository {
           state: {
             $first: "$approvalGroup.approval.state",
           },
+          count: {
+            $sum: 1
+          }
         },
       },
     ]).toArray();
@@ -137,7 +140,6 @@ export class DeploymentRepository {
     if (notApproved) {
       return {
         state: undefined,
-        comment: "Waiting for approvals",
         results
       };
     }
@@ -147,18 +149,35 @@ export class DeploymentRepository {
     if (rejected.length) {
       return {
         state: "rejected",
-        comment: rejected.map((rejection) =>
-          `* \`${rejection.groupName}\` was **rejected**`
-        ).join("\n"),
+        results
       };
     }
 
     // All groups are approved
     return {
       state: "approved",
-      comment: results.map((r) => `* \`${r.groupName}\` was \`approved\``).join(
-        "\n",
-      ),
+      results,
     };
   }
+
+  
+  public async approve(deployment: IDeployment, approvalState: ApprovalState) {
+    const { _id } = deployment;
+    const now = new Date();
+    await this.deployments.updateOne(
+      { _id },
+      {
+        $set: {
+          state: approvalState,
+          updatedAt: now,
+        }
+      }
+    );
+    return {
+      ...deployment,
+      state: approvalState,
+      updated: now,
+    }
+  }
+
 }

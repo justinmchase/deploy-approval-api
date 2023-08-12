@@ -1,3 +1,4 @@
+import { ApprovalState } from "./approval.model.ts";
 import { IModel } from "./model.ts";
 
 export interface IDeployment extends IModel {
@@ -12,4 +13,5 @@ export interface IDeployment extends IModel {
   };
   ref: string;
   runId: number;
+  state?: ApprovalState;
 }

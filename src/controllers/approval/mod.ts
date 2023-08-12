@@ -1,16 +1,15 @@
 import {
-  Application,
+  oak,
+  mongo,
   Controller,
   GitHubService,
-  mongo,
-  Response,
-  Router,
-  Status,
-} from "grove/mod.ts";
+} from "grove";
 import { assertArrayIncludes } from "std/assert/assert_array_includes.ts";
 import { Context, State } from "../../context.ts";
 import { ApprovalGroupManager, DeploymentManager } from "../../managers/mod.ts";
 import { ApprovalState } from "../../models/approval.model.ts";
+import { assertExists } from "https://deno.land/std@0.195.0/assert/assert_exists.ts";
+import { User } from "../../models/mod.ts";
 
 export class ApprovalController implements Controller<Context, State> {
   constructor(
@@ -19,12 +18,14 @@ export class ApprovalController implements Controller<Context, State> {
     private readonly approvalGroups: ApprovalGroupManager,
   ) {
   }
-  public async use(app: Application<State>): Promise<void> {
-    const router = new Router();
+  public async use(app: oak.Application<State>): Promise<void> {
+    const router = new oak.Router<State>();
     router.get(
       "/approval/:approvalGroupId",
-      async (context, _next) => {
+      async (context) => {
+        const { user } = context.state;
         const { approvalGroupId } = context.params;
+        assertExists(user);
         await this.get(
           new mongo.ObjectId(approvalGroupId),
           context.response,
@@ -33,10 +34,13 @@ export class ApprovalController implements Controller<Context, State> {
     )
     router.post(
       "/approval/:approvalGroupId/:approvalState",
-      async (context, _next) => {
+      async (context) => {
+        const { user } = context.state;
         const { approvalGroupId, approvalState } = context.params;
-        assertArrayIncludes(approvalState, ["approved", "rejected"])
+        assertArrayIncludes(["approved", "rejected"], [approvalState])
+        assertExists(user);
         await this.approval(
+          user,
           new mongo.ObjectId(approvalGroupId),
           approvalState as ApprovalState,
           context.response,
@@ -50,15 +54,14 @@ export class ApprovalController implements Controller<Context, State> {
 
   private async get(
     approvalGroupId: mongo.ObjectId,
-    res: Response,
+    res: oak.Response,
   ) {
     const approvalGroup = await this.approvalGroups.get(approvalGroupId);
     const deployment = await this.deployments.get(approvalGroup.deploymentId);
     const check = await this.deployments.check(deployment)
-    console.log(check)
-
-    res.status = Status.OK;
+    res.status = oak.Status.OK;
     res.body = {
+      ok: true,
       deployment,
       approvalGroup,
       check,
@@ -67,32 +70,32 @@ export class ApprovalController implements Controller<Context, State> {
   }
 
   private async approval(
+    approver: User,
     approvalGroupId: mongo.ObjectId,
     approvalState: ApprovalState,
-    res: Response,
+    res: oak.Response,
   ) {
     const approvalGroup = await this.approvalGroups.get(
       new mongo.ObjectId(approvalGroupId),
     );
     const approval = await this.approvalGroups.approve(
+      approver,
       approvalGroup,
       approvalState,
     );
     const deployment = await this.deployments.get(approvalGroup.deploymentId);
-    const { state, comment } = await this.deployments.check(
-      deployment,
-    );
-    if (state) {
+    const check = await this.deployments.check(deployment);
+    if (!deployment.state && check.state) {
       const client = await this.github.client(deployment.installationId);
-      await this.deployments.approve(client, deployment, state, comment);
+      await this.deployments.approve(client, deployment, check.state);
     }
-    
-    res.status = Status.OK;
+    res.status = oak.Status.OK;
     res.body = {
       ok: true,
-      approvalGroupId,
-      approvalId: `${approval._id.toHexString()}`,
-      state,
+      approval,
+      deployment,
+      approvalGroup,
+      check,
     };
     res.headers.set("Content-Type", "application/json");
     await undefined;

@@ -1,13 +1,13 @@
 import { basename } from "std/path/mod.ts";
 import {
-  github_api as gh,
+  gh,
+  oak,
   GitHubService,
   GithubWebhookController,
   IGitHubWebhookConfig,
   ILogger,
   NotFoundError,
-  Response,
-} from "grove/mod.ts";
+} from "grove";
 import { Context, State } from "../../context.ts";
 import { DeploymentManager } from "../../managers/deployment/mod.ts";
 
@@ -23,7 +23,7 @@ export class DeployApprovalWebhookController
 
   protected override async handleDeploymentProtectionRuleEvent(
     log: ILogger,
-    res: Response,
+    res: oak.Response,
     event: gh.GitHubDeploymentProtectionRuleEvent,
   ): Promise<void> {
     const {

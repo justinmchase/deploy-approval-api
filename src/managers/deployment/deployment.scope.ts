@@ -1,5 +1,5 @@
 import * as YAML from "std/yaml/mod.ts";
-import { github_api as gh } from "grove/mod.ts";
+import { gh } from "grove";
 import {
   ApprovalRepository,
   DeploymentRepository,

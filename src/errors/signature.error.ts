@@ -1,9 +1,9 @@
-import { ApplicationError, Status } from "grove/mod.ts";
+import { ApplicationError, oak } from "grove";
 
 export class SignatureError extends ApplicationError {
   constructor(details?: string) {
     super(
-      Status.Unauthorized,
+      oak.Status.Unauthorized,
       "E_SIGNATURE",
       "invalid signature",
       details,

@@ -3,7 +3,7 @@ import { initControllers } from "./controllers/mod.ts";
 import { initServices } from "./services/mod.ts";
 import { initRepositories } from "./repositories/mod.ts";
 import { initManagers } from "./managers/mod.ts";
-import { ConsoleLogger, Grove, WebMode } from "grove/mod.ts";
+import { ConsoleLogger, Grove, WebMode } from "grove";
 
 async function initContext(): Promise<Context> {
   const log = new ConsoleLogger();

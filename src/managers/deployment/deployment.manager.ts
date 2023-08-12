@@ -1,4 +1,4 @@
-import { github_api as gh, mongo } from "grove/mod.ts";
+import { gh, mongo } from "grove";
 import { DeploymentRepository } from "../../repositories/deployments/mod.ts";
 import { DeploymentScope } from "./deployment.scope.ts";
 import {
@@ -39,9 +39,9 @@ export class DeploymentManager {
       runId,
     );
     const created = await scope.createDeployment();
-    const { state, comment } = await this.check(created);
+    const { state } = await this.check(created);
     if (state) {
-      await this.approve(client, created, state, comment);
+      await this.approve(client, created, state);
     }
   }
 
@@ -49,7 +49,7 @@ export class DeploymentManager {
     return await this.deployments.check(deployment);
   }
   
-  public async approve(client: gh.GitHubClient, deployment: IDeployment, approvalState: ApprovalState, comment: string) {
+  public async approve(client: gh.GitHubClient, deployment: IDeployment, approvalState: ApprovalState) {
     const { runId, environment, repository } = deployment;
     const [owner, repo] = repository.split("/");
     await gh.api.repos.actions.runs.deployment_protection_rule.create({
@@ -62,9 +62,11 @@ export class DeploymentManager {
       runId,
       environmentName: environment,
       state: approvalState,
-      comment: comment ?? approvalState === "approved"
+      comment: `[${approvalState === "approved"
         ? "Deployment Approved"
-        : "Deployment Rejected",
+        : "Deployment Rejected"
+      }](https://deploy-approval.app/deployment/${deployment._id})`
     });
+    await this.deployments.approve(deployment, approvalState);
   }
 }

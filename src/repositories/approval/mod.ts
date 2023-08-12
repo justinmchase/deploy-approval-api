@@ -1,5 +1,5 @@
-import { mongo, MongoService, NotFoundError } from "grove/mod.ts";
-import { ApprovalState, IApproval } from "../../models/mod.ts";
+import { mongo, MongoService, NotFoundError } from "grove";
+import { ApprovalState, IApproval, User } from "../../models/mod.ts";
 import { IApprovalGroup } from "../../models/approval_group.model.ts";
 
 export class ApprovalRepository {
@@ -9,23 +9,36 @@ export class ApprovalRepository {
   }
 
   public async create(
+    approver: User,
     group: IApprovalGroup,
     state: ApprovalState,
-    comment?: string,
   ) {
     const { _id: approvalGroupId, deploymentId } = group;
-    const approvalId = await this.approvals.insertOne(
+    const approval = await this.approvals.findAndModify(
       {
         deploymentId,
         approvalGroupId,
-        state,
-        comment,
-        createdAt: new Date(),
+        "approver.id": approver.id,
       },
+      {
+        new: true,
+        upsert: true,
+        update: {
+          $setOnInsert: {
+            deploymentId,
+            approvalGroupId,
+            createdAt: new Date()
+          },
+          $set: {
+            approver,
+            state,
+            updatedAt: new Date()
+          }
+        }
+      }
     );
-    const approval = await this.approvals.findOne({ _id: approvalId });
     if (!approval) {
-      throw new NotFoundError("IApproval", `${approvalId}`);
+      throw new NotFoundError("IApproval", `${deploymentId}.${approvalGroupId}.${approver.id}`);
     }
     return approval;
   }

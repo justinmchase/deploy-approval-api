@@ -1,4 +1,4 @@
-import { mongo } from "grove/mod.ts";
+import { mongo } from "grove";
 
 export interface IModel extends mongo.Document {
   _id: mongo.ObjectId;
