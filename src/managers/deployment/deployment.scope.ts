@@ -66,10 +66,8 @@ export class DeploymentScope {
         "environment": this.deployment.environment,
         "group-id": group.id,
         "group-name": group.name,
-        "approve-url":
-          `http://deploy-approval.app/approval/${approvalGroup._id}?state=approved`,
-        "reject-url":
-          `http://deploy-approval.app/approval/${approvalGroup._id}?state=rejected`,
+        "approval-url":
+          `http://deploy-approval.app/approval/${approvalGroup._id}`,
       },
     });
   }

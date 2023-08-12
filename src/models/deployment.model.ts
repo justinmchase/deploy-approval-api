@@ -5,6 +5,11 @@ export interface IDeployment extends IModel {
   repository: string;
   installationId: number;
   deploymentId: number;
+  creator: {
+    login: string;
+    url: string;
+    avatarUrl: string;
+  };
   ref: string;
   runId: number;
 }

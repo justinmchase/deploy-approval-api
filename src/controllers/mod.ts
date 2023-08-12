@@ -9,7 +9,7 @@ import {
 import { Context, State } from "../context.ts";
 import { DeployApprovalWebhookController } from "./github_webhook/mod.ts";
 import { SiteController } from "./site/mod.ts";
-import { ApproveController } from "./approve/mod.ts";
+import { ApprovalController } from "./approval/mod.ts";
 import { AzurePublisherDomainController } from "./azure/mod.ts";
 
 export async function initControllers(
@@ -35,7 +35,7 @@ export async function initControllers(
     github,
     deployments,
   );
-  const approve = new ApproveController(
+  const approve = new ApprovalController(
     github,
     deployments,
     approvalGroups,

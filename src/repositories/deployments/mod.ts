@@ -10,6 +10,14 @@ export type UpsertDeployment = {
   runId: number;
 };
 
+export type ResultType = {
+  deploymentId: mongo.ObjectId;
+  approvalGroupId: mongo.ObjectId;
+  groupId: string;
+  groupName: string;
+  state: ApprovalState | null;
+};
+
 export class DeploymentRepository {
   private readonly deployments: mongo.Collection<IDeployment>;
   constructor(mongo: MongoService) {
@@ -27,7 +35,7 @@ export class DeploymentRepository {
   public async upsert(info: UpsertDeployment) {
     const { repository, deployment, installationId, runId } = info;
     const { full_name } = repository;
-    const { id: deploymentId, environment, ref } = deployment;
+    const { id: deploymentId, environment, ref, creator: { avatar_url, login, url } } = deployment;
     const upserted = await this.deployments.findAndModify(
       {
         deploymentId,
@@ -42,6 +50,11 @@ export class DeploymentRepository {
             installationId,
             environment,
             ref,
+            creator: {
+              login,
+              url,
+              avatarUrl: avatar_url
+            },
             createdAt: new Date(),
           },
           $set: {
@@ -59,15 +72,8 @@ export class DeploymentRepository {
 
   public async check(
     deployment: IDeployment,
-  ): Promise<{ state?: ApprovalState; comment?: string }> {
+  ): Promise<{ state?: ApprovalState; comment: string, results: ResultType }> {
     const { _id: deploymentId } = deployment;
-    type ResultType = {
-      deploymentId: mongo.ObjectId;
-      approvalGroupId: mongo.ObjectId;
-      groupId: string;
-      groupName: string;
-      state: ApprovalState | null;
-    };
     const results = await this.deployments.aggregate<ResultType>([
       {
         $match: {
@@ -129,7 +135,11 @@ export class DeploymentRepository {
     // one or more of the approval groups have not been approved or rejected yet
     const notApproved = results.find((r) => r.state === null);
     if (notApproved) {
-      return {};
+      return {
+        state: undefined,
+        comment: "Waiting for approvals",
+        results
+      };
     }
 
     // If one or more groups are rejected

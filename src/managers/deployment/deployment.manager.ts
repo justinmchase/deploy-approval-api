@@ -6,6 +6,7 @@ import {
   ApprovalRepository,
 } from "../../repositories/mod.ts";
 import { IDeployment } from "../../models/deployment.model.ts";
+import { ApprovalState } from "../../models/approval.model.ts";
 
 export class DeploymentManager {
   constructor(
@@ -38,31 +39,32 @@ export class DeploymentManager {
       runId,
     );
     const created = await scope.createDeployment();
-    await this.check(client, created);
+    const { state, comment } = await this.check(created);
+    if (state) {
+      await this.approve(client, created, state, comment);
+    }
   }
 
-  public async check(
-    client: gh.GitHubClient,
-    deployment: IDeployment,
-  ) {
+  public async check(deployment: IDeployment) {
+    return await this.deployments.check(deployment);
+  }
+  
+  public async approve(client: gh.GitHubClient, deployment: IDeployment, approvalState: ApprovalState, comment: string) {
     const { runId, environment, repository } = deployment;
     const [owner, repo] = repository.split("/");
-    const { state, comment } = await this.deployments.check(deployment);
-    if (state) {
-      await gh.api.repos.actions.runs.deployment_protection_rule.create({
-        client,
-        repository: {
-          full_name: repository,
-          name: repo,
-          owner: { login: owner },
-        } as gh.GitHubRepository,
-        runId,
-        environmentName: environment,
-        state,
-        comment: comment ?? state === "approved"
-          ? "Deployment Approved"
-          : "Deployment Rejected",
-      });
-    }
+    await gh.api.repos.actions.runs.deployment_protection_rule.create({
+      client,
+      repository: {
+        full_name: repository,
+        name: repo,
+        owner: { login: owner },
+      } as gh.GitHubRepository,
+      runId,
+      environmentName: environment,
+      state: approvalState,
+      comment: comment ?? approvalState === "approved"
+        ? "Deployment Approved"
+        : "Deployment Rejected",
+    });
   }
 }
