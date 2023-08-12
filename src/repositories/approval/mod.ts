@@ -1,6 +1,7 @@
 import { mongo, MongoService, NotFoundError } from "grove";
 import { ApprovalState, IApproval, User } from "../../models/mod.ts";
 import { IApprovalGroup } from "../../models/approval_group.model.ts";
+import { IDeployment } from "../../models/deployment.model.ts";
 
 export class ApprovalRepository {
   private readonly approvals: mongo.Collection<IApproval>;
@@ -17,12 +18,16 @@ export class ApprovalRepository {
     )
   }
 
+  public async getAllFor(deployment: IDeployment) {
+    return await this.approvals.find({ deploymentId: deployment._id }).toArray();
+  }
+
   public async create(
     approver: User,
     group: IApprovalGroup,
     state: ApprovalState,
   ) {
-    const { _id: approvalGroupId, deploymentId } = group;
+    const { _id: approvalGroupId, name: approvalGroupName, deploymentId } = group;
     const approval = await this.approvals.findAndModify(
       {
         deploymentId,
@@ -36,6 +41,7 @@ export class ApprovalRepository {
           $setOnInsert: {
             deploymentId,
             approvalGroupId,
+            approvalGroupName,
             createdAt: new Date()
           },
           $set: {

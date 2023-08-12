@@ -12,6 +12,7 @@ export type UpsertDeployment = {
 export type ResultType = {
   deploymentId: mongo.ObjectId;
   approvalGroupId: mongo.ObjectId;
+  approvalAt: Date;
   groupId: string;
   groupName: string;
   state: ApprovalState | null;
@@ -120,6 +121,9 @@ export class DeploymentRepository {
           },
           approvalGroupId: {
             $first: "$approvalGroup._id",
+          },
+          approvalAt: {
+            $max: "$createdAt"
           },
           groupId: {
             $first: "$approvalGroup.id",

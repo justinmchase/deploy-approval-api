@@ -7,6 +7,7 @@ export type ApprovalState = "approved" | "rejected";
 export interface IApproval extends IModel {
   deploymentId: mongo.ObjectId;
   approvalGroupId: mongo.ObjectId;
+  approvalGropuName: string;
   approver: User;
   state: ApprovalState;
   reason?: string;

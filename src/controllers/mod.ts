@@ -12,6 +12,7 @@ import { SiteController } from "./site/mod.ts";
 import { ApprovalController } from "./approval/mod.ts";
 import { AzurePublisherDomainController } from "./azure/mod.ts";
 import { AuthController } from "./auth/mod.ts";
+import { DeploymentController } from "./deployment/mod.ts";
 
 export async function initControllers(
   context: Context,
@@ -47,6 +48,11 @@ export async function initControllers(
     approvalGroups,
     approvals,
   );
+  const deployment = new DeploymentController(
+    deployments,
+    approvalGroups,
+    approvals
+  )
   const notFound = new NotFoundController();
 
   await error.use(app);
@@ -59,6 +65,7 @@ export async function initControllers(
 
   await authentication.use(app);
   await approve.use(app);
+  await deployment.use(app);
 
   // If all else fails 404
   await notFound.use(app);

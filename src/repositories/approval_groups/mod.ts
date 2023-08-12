@@ -29,6 +29,12 @@ export class ApprovalGroupRepository {
     return approvalGroup;
   }
 
+  public async getAllFor({ deployment }: { deployment: IDeployment }) {
+    return await this.approvalGroups.find(
+      { deploymentId: deployment._id }
+    ).toArray();
+  }
+
   public async upsert(info: ApprovalGroupUpsert) {
     const { deployment, group } = info;
     const { _id: deploymentId } = deployment;

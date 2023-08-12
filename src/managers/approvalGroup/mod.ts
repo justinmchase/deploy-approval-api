@@ -6,6 +6,7 @@ import {
   ApprovalRepository,
 } from "../../repositories/mod.ts";
 import { User } from "../../models/user.model.ts";
+import { IDeployment } from "../../models/deployment.model.ts";
 
 export class ApprovalGroupManager {
   constructor(
@@ -15,6 +16,10 @@ export class ApprovalGroupManager {
 
   public async get(approvalGroupId: mongo.ObjectId) {
     return await this.approvalGroups.get(approvalGroupId);
+  }
+
+  public async getAllFor(args: { deployment: IDeployment }) {
+    return await this.approvalGroups.getAllFor(args)
   }
 
   public async approve(

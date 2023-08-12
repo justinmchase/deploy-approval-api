@@ -1,4 +1,5 @@
 import { IApprovalGroup } from "../../models/approval_group.model.ts";
+import { IDeployment } from "../../models/deployment.model.ts";
 import { User } from "../../models/user.model.ts";
 import { ApprovalRepository } from "../../repositories/mod.ts";
 
@@ -7,5 +8,8 @@ export class ApprovalManager {
 
   public async getFor(approver: User, approvalGroup: IApprovalGroup) {
     return await this.approvals.getFor(approver, approvalGroup);
+  }
+  public async getAllFor(deployment: IDeployment) {
+    return await this.approvals.getAllFor(deployment);
   }
 }
