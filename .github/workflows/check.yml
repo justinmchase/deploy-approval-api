@@ -1,0 +1,33 @@
+name: Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout Deno Module
+        uses: actions/checkout@v3
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: 1.x
+
+      - name: Check Formatting
+        run: deno fmt --check
+
+      - name: Lint
+        run: deno lint
+        
+      - name: Cache Deno dependencies 
+        uses: actions/cache@v3
+        with:
+          path: ~/.deno-cache
+          key: ${{ hashFiles('deno.lock') }}
+
+      - name: Run Deno Tests
+        run: deno test --allow-read --allow-env

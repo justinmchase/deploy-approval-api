@@ -7,9 +7,8 @@ import {
 import { assertArrayIncludes } from "std/assert/assert_array_includes.ts";
 import { Context, State } from "../../context.ts";
 import { ApprovalGroupManager, DeploymentManager } from "../../managers/mod.ts";
-import { ApprovalState, IApproval } from "../../models/approval.model.ts";
+import { ApprovalState } from "../../models/approval.model.ts";
 import { assertExists } from "https://deno.land/std@0.195.0/assert/assert_exists.ts";
-import { IDeployment, User } from "../../models/mod.ts";
 import { ApprovalManager } from "../../managers/mod.ts";
 import { ApprovalCheck } from "../../repositories/mod.ts";
 
