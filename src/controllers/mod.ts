@@ -19,39 +19,31 @@ export async function initControllers(
   app: oak.Application<State>,
 ) {
   const {
-    services: {
-      config,
-      github,
-      auth,
-    },
-    managers: {
-      deployments,
-      approvalGroups,
-      approvals,
-    },
+    services,
+    managers,
   } = context;
   const error = new ErrorController();
   const health = new HealthController();
   const isHtml = new IsHtmlController();
   const log = new LogController();
-  const azure = new AzurePublisherDomainController(config);
+  const azure = new AzurePublisherDomainController(services.config);
   const site = new SiteController();
   const githubWebhook = new DeployApprovalWebhookController(
-    config,
-    github,
-    deployments,
+    services.config,
+    services.github,
+    managers.deployments,
   );
-  const authentication = new AuthController(auth);
+  const authentication = new AuthController(services.auth);
   const approve = new ApprovalController(
-    github,
-    deployments,
-    approvalGroups,
-    approvals,
+    services.github,
+    managers.deployments,
+    managers.approvalGroups,
+    managers.approvals,
   );
   const deployment = new DeploymentController(
-    deployments,
-    approvalGroups,
-    approvals
+    managers.deployments,
+    managers.approvalGroups,
+    managers.approvals
   )
   const notFound = new NotFoundController();
 

@@ -11,6 +11,9 @@ import { ApprovalState } from "../../models/approval.model.ts";
 import { assertExists } from "https://deno.land/std@0.195.0/assert/assert_exists.ts";
 import { ApprovalManager } from "../../managers/mod.ts";
 import { ApprovalCheck } from "../../repositories/mod.ts";
+import { User } from "../../models/mod.ts";
+import { PageArgs } from "../../models/page.ts";
+import { getInt } from "../utils/param.ts";
 
 export class ApprovalController implements Controller<Context, State> {
   constructor(
@@ -47,6 +50,22 @@ export class ApprovalController implements Controller<Context, State> {
           new mongo.ObjectId(approvalGroupId),
           approvalState as ApprovalState,
           context.response,
+        );
+      }
+    );
+    
+    router.get(
+      "/approvals",
+      async (context) => {
+        const { request: { url }, state: { user } } = context;
+        assertExists(user);
+
+        const offset = getInt(url.searchParams, "offset", 0, Number.MAX_SAFE_INTEGER, 0);
+        const limit = getInt(url.searchParams, "limit", 0, 25, 10);
+        await this.approvalsForUser(
+          context.response,
+          user,
+          { offset, limit },
         );
       }
     );
@@ -121,5 +140,23 @@ export class ApprovalController implements Controller<Context, State> {
     };
     res.headers.set("Content-Type", "application/json");
     await undefined;
+  }
+
+  private async approvalsForUser(
+    res: oak.Response,
+    user: User,
+    page: PageArgs,
+  ) {
+    const { offset, limit } = page;
+    const { total, results } = await this.approvals.getAllForUser({ user, ...page })
+    res.status = oak.Status.OK;
+    res.body = {
+      ok: true,
+      offset,
+      limit,
+      total,
+      results,
+    }
+    res.headers.set("Content-Type", "application/json");
   }
 }

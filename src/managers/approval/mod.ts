@@ -1,5 +1,6 @@
 import { IApprovalGroup } from "../../models/approval_group.model.ts";
 import { IDeployment } from "../../models/deployment.model.ts";
+import { PageArgs } from "../../models/page.ts";
 import { User } from "../../models/user.model.ts";
 import { ApprovalRepository } from "../../repositories/mod.ts";
 
@@ -12,4 +13,9 @@ export class ApprovalManager {
   public async getAllFor(deployment: IDeployment) {
     return await this.approvals.getAllFor(deployment);
   }
+  
+  public async getAllForUser(args: { user: User } & PageArgs) {
+    return await this.approvals.getAllForUser(args);
+  }
+
 }
