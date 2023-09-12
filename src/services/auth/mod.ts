@@ -4,13 +4,15 @@ import { User } from "../../models/user.model.ts";
 export class AuthService {
   
   private readonly keys: JWTVerifyGetKey;
-  constructor(config: { azureTenantId: string }) {
-    const { azureTenantId } = config;
-    this.keys = createRemoteJWKSet(new URL(`https://login.microsoftonline.com/${azureTenantId}/discovery/keys`));
+  constructor(config: { azureTenantId: string, azureB2CWorkflow: string }) {
+    const { azureTenantId, azureB2CWorkflow } = config;
+    const keyUri = `https://deployapproval.b2clogin.com/deployapproval.onmicrosoft.com/${azureB2CWorkflow}/discovery/v2.0/keys`
+    this.keys = createRemoteJWKSet(new URL(keyUri));
   }
 
   public async verify(jwt: string): Promise<User> {
-    const { payload } = await jwtVerify(jwt, this.keys);
+    const verified = await jwtVerify(jwt, this.keys);
+    const { payload } = verified
     const token = payload as unknown as Record<string, string>;
     return {
       id: token.oid,
