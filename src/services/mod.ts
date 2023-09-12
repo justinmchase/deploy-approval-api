@@ -16,7 +16,7 @@ export async function initServices(log: ILogger): Promise<Services> {
   const config = new ConfigService(env);
   const github = await GitHubService.create(log, config);
   const mongo = await MongoService.create(log, config);
-  const auth = new AuthService();
+  const auth = new AuthService(config);
   return {
     config,
     github,

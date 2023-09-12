@@ -6,6 +6,7 @@ export class ConfigService {
   public readonly githubWebhookPath: string;
   public readonly githubWebhookSecret?: string;
   public readonly mongoConnectionString: string;
+  public readonly azureTenantId: string;
   public readonly azureClientId: string;
   public readonly azureClientSecret?: string;
   public readonly appOrigin: string;
@@ -22,7 +23,8 @@ export class ConfigService {
       env,
       "MONGO_CONNECTION_STRING",
     );
-    this.azureClientId = readString(env, "AZURE_CLIENT_ID", "ce608137-10fc-4b3e-824b-a3b601a2f424");
+    this.azureTenantId = readString(env, "AZURE_TENANT_ID", "bb47d1e0-0ffb-4077-a04e-352c73ebebfa");
+    this.azureClientId = readString(env, "AZURE_CLIENT_ID", "1a9fa409-389c-4da1-877a-fe20bca08edd");
     this.azureClientSecret = readString(env, "AZURE_CLIENT_SECRET");
     this.appOrigin = readString(env, "APP_ORIGIN", "localhost:8080")
   }
